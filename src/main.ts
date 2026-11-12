@@ -16,6 +16,7 @@ import type { CertificateFields, DeathInsuranceFields, ExportFormat, TradeAction
 
 const CONVENTION_COOKIE = 'trade-cert-convention';
 const SIGNOFF_COOKIE = 'trade-cert-signoff';
+const DEATH_SIGNATURE_COOKIE = 'death-cert-signature';
 
 async function main(): Promise<void> {
   await ensureUnlocked();
@@ -140,6 +141,11 @@ async function main(): Promise<void> {
       if (activeCert === 'death-insurance') renderDeath();
     });
   }
+
+  const storedSignature = getCookie(DEATH_SIGNATURE_COOKIE);
+  if (storedSignature !== undefined) deathSignature.value = storedSignature;
+
+  deathSignature.addEventListener('input', () => setCookie(DEATH_SIGNATURE_COOKIE, deathSignature.value));
 
   // ------------------------------------------------------------------ tabs
 

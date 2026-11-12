@@ -51,30 +51,35 @@ export function fillTextTruncated(ctx: CanvasRenderingContext2D, text: string, f
   ctx.fillText(display, field.x, field.y);
 }
 
+/** Word-wraps each paragraph to maxWidth, but treats '\n' in the source text as a hard line break. */
 export function wrapText(ctx: CanvasRenderingContext2D, text: string, field: MultiLineField): void {
   if (!text) return;
   ctx.font = `400 ${field.fontSize}px "Segoe UI", system-ui, sans-serif`;
   ctx.fillStyle = '#111';
   ctx.textBaseline = 'alphabetic';
 
-  const words = text.split(/\s+/).filter(Boolean);
-  const lines: string[] = [];
-  let current = '';
-
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (ctx.measureText(candidate).width > field.maxWidth && current) {
-      lines.push(current);
-      current = word;
-      if (lines.length === field.maxLines) break;
-    } else {
-      current = candidate;
+  const allLines: string[] = [];
+  for (const paragraph of text.split('\n')) {
+    const words = paragraph.split(/\s+/).filter(Boolean);
+    if (words.length === 0) {
+      allLines.push('');
+      continue;
     }
+    let current = '';
+    for (const word of words) {
+      const candidate = current ? `${current} ${word}` : word;
+      if (ctx.measureText(candidate).width > field.maxWidth && current) {
+        allLines.push(current);
+        current = word;
+      } else {
+        current = candidate;
+      }
+    }
+    allLines.push(current);
   }
-  if (lines.length < field.maxLines && current) lines.push(current);
 
-  const truncated = lines.length === field.maxLines && words.join(' ') !== lines.join(' ');
-  if (truncated) {
+  const lines = allLines.slice(0, field.maxLines);
+  if (allLines.length > field.maxLines) {
     const lastIndex = lines.length - 1;
     let lastLine = lines[lastIndex] ?? '';
     while (lastLine.length > 1 && ctx.measureText(`${lastLine}…`).width > field.maxWidth) {
