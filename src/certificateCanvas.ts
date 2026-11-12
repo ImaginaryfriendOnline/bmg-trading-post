@@ -1,5 +1,12 @@
 import type { CertificateFields, TradeAction } from './types.ts';
-import { type SingleLineField, type MultiLineField, fillTextTruncated, wrapText, loadImage } from './textLayout.ts';
+import {
+  type SingleLineField,
+  type MultiLineField,
+  fillTextTruncated,
+  wrapText,
+  loadImage,
+  drawImageContained,
+} from './textLayout.ts';
 
 export const CANVAS_WIDTH = 1965;
 export const CANVAS_HEIGHT = 871;
@@ -83,7 +90,7 @@ export function drawCertificate(
   wrapText(ctx, fields.notes, FIELD_LAYOUT.notes);
   wrapText(ctx, fields.signoff, FIELD_LAYOUT.signoff);
 
-  if (fields.showLogo && logo) {
-    ctx.drawImage(logo, LOGO_LAYOUT.x, LOGO_LAYOUT.y, LOGO_LAYOUT.width, LOGO_LAYOUT.height);
+  if (logo) {
+    drawImageContained(ctx, logo, LOGO_LAYOUT);
   }
 }

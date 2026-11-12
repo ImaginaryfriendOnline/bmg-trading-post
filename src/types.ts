@@ -13,7 +13,6 @@ export interface CertificateFields {
   trades: [TradeRow, TradeRow, TradeRow];
   notes: string;
   signoff: string;
-  showLogo: boolean;
 }
 
 export interface DeathInsuranceFields {
@@ -23,5 +22,7 @@ export interface DeathInsuranceFields {
 }
 
 export type ExportFormat = 'image/png' | 'image/jpeg' | 'image/webp';
+
+export type LogoChoice = 'none' | 'bmg' | 'iuzual';
 
 export type CertId = 'trade' | 'death-insurance';

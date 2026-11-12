@@ -12,7 +12,7 @@ import { saveFileAs } from './saveFile.ts';
 import { copyCanvasToClipboard, isClipboardImageSupported } from './clipboard.ts';
 import { ensureUnlocked } from './passwordGate.ts';
 import { getCookie, setCookie } from './cookies.ts';
-import type { CertificateFields, DeathInsuranceFields, ExportFormat, TradeAction, CertId } from './types.ts';
+import type { CertificateFields, DeathInsuranceFields, ExportFormat, TradeAction, CertId, LogoChoice } from './types.ts';
 
 const CONVENTION_COOKIE = 'trade-cert-convention';
 const SIGNOFF_COOKIE = 'trade-cert-signoff';
@@ -33,7 +33,18 @@ async function main(): Promise<void> {
     else delete exportStatus.dataset['kind'];
   }
 
-  const logoImage = await loadImage(`${import.meta.env.BASE_URL}bmg-logo.png`);
+  const bmgLogo = await loadImage(`${import.meta.env.BASE_URL}bmg-logo.png`);
+  const iuzualLogo = await loadImage(`${import.meta.env.BASE_URL}iuzual-suspects-logo.png`);
+  const logoChoice = document.querySelector<HTMLSelectElement>('#logo-choice')!;
+
+  function getSelectedLogo(): HTMLImageElement | undefined {
+    const choice = logoChoice.value as LogoChoice;
+    if (choice === 'bmg') return bmgLogo;
+    if (choice === 'iuzual') return iuzualLogo;
+    return undefined;
+  }
+
+  logoChoice.addEventListener('change', () => certs[activeCert].render());
 
   // ------------------------------------------------------------- trade cert
 
@@ -42,7 +53,6 @@ async function main(): Promise<void> {
   const character = document.querySelector<HTMLInputElement>('#character')!;
   const notes = document.querySelector<HTMLTextAreaElement>('#notes')!;
   const signoff = document.querySelector<HTMLTextAreaElement>('#signoff')!;
-  const showLogo = document.querySelector<HTMLInputElement>('#show-logo')!;
 
   const tradeRowInputs = [0, 1, 2].map((index) => ({
     action: document.querySelector<HTMLSelectElement>(`#trade-${index}-action`)!,
@@ -63,14 +73,13 @@ async function main(): Promise<void> {
       })) as CertificateFields['trades'],
       notes: notes.value,
       signoff: signoff.value,
-      showLogo: showLogo.checked,
     };
   }
 
   const tradeBackground = await loadBackgroundImage();
 
   function renderTrade(): void {
-    drawCertificate(ctx, tradeBackground, logoImage, readTradeFields());
+    drawCertificate(ctx, tradeBackground, getSelectedLogo(), readTradeFields());
   }
 
   const tradeInputs = [
@@ -79,7 +88,6 @@ async function main(): Promise<void> {
     character,
     notes,
     signoff,
-    showLogo,
     ...tradeRowInputs.flatMap((row) => [row.action, row.itemGold, row.newItemSpell]),
   ];
   for (const input of tradeInputs) {
@@ -120,7 +128,7 @@ async function main(): Promise<void> {
   const deathBackground = await loadDeathBackgroundImage();
 
   function renderDeath(): void {
-    drawDeathInsuranceCertificate(ctx, deathBackground, logoImage, readDeathFields());
+    drawDeathInsuranceCertificate(ctx, deathBackground, getSelectedLogo(), readDeathFields());
   }
 
   const deathInputs = [deathPlayer, deathCharacter, deathLevel, deathSignature];

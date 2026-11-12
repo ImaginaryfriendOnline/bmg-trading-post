@@ -1,5 +1,12 @@
 import type { DeathInsuranceFields } from './types.ts';
-import { type SingleLineField, type MultiLineField, fillTextTruncated, wrapText, loadImage } from './textLayout.ts';
+import {
+  type SingleLineField,
+  type MultiLineField,
+  fillTextTruncated,
+  wrapText,
+  loadImage,
+  drawImageContained,
+} from './textLayout.ts';
 
 export const DEATH_CANVAS_WIDTH = 1117;
 export const DEATH_CANVAS_HEIGHT = 1425;
@@ -37,6 +44,6 @@ export function drawDeathInsuranceCertificate(
   wrapText(ctx, fields.signature, FIELD_LAYOUT.signature);
 
   if (logo) {
-    ctx.drawImage(logo, LOGO_LAYOUT.x, LOGO_LAYOUT.y, LOGO_LAYOUT.width, LOGO_LAYOUT.height);
+    drawImageContained(ctx, logo, LOGO_LAYOUT);
   }
 }

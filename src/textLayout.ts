@@ -21,6 +21,20 @@ export async function loadImage(src: string): Promise<HTMLImageElement> {
   return img;
 }
 
+/** Draws an image scaled to fit (preserving aspect ratio) within and centered in the given box. */
+export function drawImageContained(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  box: { x: number; y: number; width: number; height: number },
+): void {
+  const scale = Math.min(box.width / img.width, box.height / img.height);
+  const w = img.width * scale;
+  const h = img.height * scale;
+  const x = box.x + (box.width - w) / 2;
+  const y = box.y + (box.height - h) / 2;
+  ctx.drawImage(img, x, y, w, h);
+}
+
 export function fillTextTruncated(ctx: CanvasRenderingContext2D, text: string, field: SingleLineField): void {
   if (!text) return;
   ctx.font = `600 ${field.fontSize}px "Segoe UI", system-ui, sans-serif`;

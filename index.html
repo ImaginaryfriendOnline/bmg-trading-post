@@ -71,7 +71,6 @@
             <h2>Notes &amp; Signoff</h2>
             <label>Notes<textarea id="notes" rows="4"></textarea></label>
             <label>Marketplace Signoff<textarea id="signoff" rows="2"></textarea></label>
-            <label class="checkbox-row"><input type="checkbox" id="show-logo" checked /> Show BMG logo on signoff</label>
           </section>
         </div>
 
@@ -93,6 +92,17 @@
             <label>High Priest Signature<textarea id="death-signature" rows="4"></textarea></label>
           </section>
         </div>
+
+        <section class="panel">
+          <h2>Logo</h2>
+          <label>Bottom-right logo
+            <select id="logo-choice">
+              <option value="bmg" selected>Baldman Games</option>
+              <option value="iuzual">Iuzual Suspects</option>
+              <option value="none">No logo</option>
+            </select>
+          </label>
+        </section>
 
         <section class="panel">
           <h2>Export</h2>
