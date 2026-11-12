@@ -104,7 +104,7 @@ async function main(): Promise<void> {
   const deathPlayer = document.querySelector<HTMLInputElement>('#death-player')!;
   const deathCharacter = document.querySelector<HTMLInputElement>('#death-character')!;
   const deathLevel = document.querySelector<HTMLInputElement>('#death-level')!;
-  const deathSignature = document.querySelector<HTMLInputElement>('#death-signature')!;
+  const deathSignature = document.querySelector<HTMLTextAreaElement>('#death-signature')!;
 
   function readDeathFields(): DeathInsuranceFields {
     const character = deathCharacter.value.trim();

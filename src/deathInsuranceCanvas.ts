@@ -1,5 +1,5 @@
 import type { DeathInsuranceFields } from './types.ts';
-import { type SingleLineField, fillTextTruncated, loadImage } from './textLayout.ts';
+import { type SingleLineField, type MultiLineField, fillTextTruncated, wrapText, loadImage } from './textLayout.ts';
 
 export const DEATH_CANVAS_WIDTH = 1117;
 export const DEATH_CANVAS_HEIGHT = 1425;
@@ -8,8 +8,8 @@ export const DEATH_CANVAS_HEIGHT = 1425;
 export const FIELD_LAYOUT = {
   player: { x: 465, y: 692, maxWidth: 595, fontSize: 26 } as SingleLineField,
   characterAndLevel: { x: 465, y: 743, maxWidth: 595, fontSize: 26 } as SingleLineField,
-  // Signature sits in the top-left of its tall row, leaving the bottom-right free for the logo.
-  signature: { x: 465, y: 800, maxWidth: 420, fontSize: 26 } as SingleLineField,
+  // Signature sits in the top-left of its tall row, leaving the bottom-right free for the logo; up to 4 lines fit above the row's bottom border.
+  signature: { x: 465, y: 800, maxWidth: 420, lineHeight: 34, maxLines: 4, fontSize: 26 } as MultiLineField,
 };
 
 /** Reserved square in the bottom-right of the signature row for the BMG logo. */
@@ -34,7 +34,7 @@ export function drawDeathInsuranceCertificate(
 
   fillTextTruncated(ctx, fields.player, FIELD_LAYOUT.player);
   fillTextTruncated(ctx, fields.characterAndLevel, FIELD_LAYOUT.characterAndLevel);
-  fillTextTruncated(ctx, fields.signature, FIELD_LAYOUT.signature);
+  wrapText(ctx, fields.signature, FIELD_LAYOUT.signature);
 
   if (logo) {
     ctx.drawImage(logo, LOGO_LAYOUT.x, LOGO_LAYOUT.y, LOGO_LAYOUT.width, LOGO_LAYOUT.height);
