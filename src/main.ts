@@ -108,6 +108,18 @@ async function main(): Promise<void> {
   convention.addEventListener('input', () => setCookie(CONVENTION_COOKIE, convention.value));
   signoff.addEventListener('input', () => setCookie(SIGNOFF_COOKIE, signoff.value));
 
+  document.querySelector<HTMLButtonElement>('#clear-trade')!.addEventListener('click', () => {
+    player.value = '';
+    character.value = '';
+    for (const row of tradeRowInputs) {
+      row.action.value = 'None';
+      row.itemGold.value = '';
+      row.newItemSpell.value = '';
+    }
+    notes.value = '';
+    renderTrade();
+  });
+
   // ------------------------------------------------------- death insurance
 
   const deathPlayer = document.querySelector<HTMLInputElement>('#death-player')!;
@@ -146,6 +158,13 @@ async function main(): Promise<void> {
   if (storedSignature !== undefined) deathSignature.value = storedSignature;
 
   deathSignature.addEventListener('input', () => setCookie(DEATH_SIGNATURE_COOKIE, deathSignature.value));
+
+  document.querySelector<HTMLButtonElement>('#clear-death')!.addEventListener('click', () => {
+    deathPlayer.value = '';
+    deathCharacter.value = '';
+    deathLevel.value = '';
+    renderDeath();
+  });
 
   // ------------------------------------------------------------------ tabs
 
