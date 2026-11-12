@@ -39,8 +39,12 @@ export const FIELD_LAYOUT = {
     },
   ] as const,
   notes: { x: 50, y: 708, maxWidth: 1250, lineHeight: 34, maxLines: 4, fontSize: 24 } as MultiLineField,
-  signoff: { x: 1348, y: 708, maxWidth: 560, lineHeight: 34, maxLines: 4, fontSize: 24 } as MultiLineField,
+  // Signoff text starts right of the reserved logo square below, so toggling the logo never reflows the text.
+  signoff: { x: 1455, y: 708, maxWidth: 458, lineHeight: 34, maxLines: 4, fontSize: 24 } as MultiLineField,
 };
+
+/** Reserved square in the left part of the signoff box for the optional BMG logo. */
+export const LOGO_LAYOUT = { x: 1343, y: 711, width: 100, height: 100 };
 
 let backgroundImage: HTMLImageElement | undefined;
 
@@ -50,6 +54,17 @@ export async function loadBackgroundImage(): Promise<HTMLImageElement> {
   img.src = `${import.meta.env.BASE_URL}trading-post-cert.png`;
   await img.decode();
   backgroundImage = img;
+  return img;
+}
+
+let logoImage: HTMLImageElement | undefined;
+
+export async function loadLogoImage(): Promise<HTMLImageElement> {
+  if (logoImage) return logoImage;
+  const img = new Image();
+  img.src = `${import.meta.env.BASE_URL}bmg-logo.png`;
+  await img.decode();
+  logoImage = img;
   return img;
 }
 
@@ -109,6 +124,7 @@ export function wrapText(ctx: CanvasRenderingContext2D, text: string, field: Mul
 export function drawCertificate(
   ctx: CanvasRenderingContext2D,
   bg: HTMLImageElement,
+  logo: HTMLImageElement | undefined,
   fields: CertificateFields,
 ): void {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -127,4 +143,8 @@ export function drawCertificate(
 
   wrapText(ctx, fields.notes, FIELD_LAYOUT.notes);
   wrapText(ctx, fields.signoff, FIELD_LAYOUT.signoff);
+
+  if (fields.showLogo && logo) {
+    ctx.drawImage(logo, LOGO_LAYOUT.x, LOGO_LAYOUT.y, LOGO_LAYOUT.width, LOGO_LAYOUT.height);
+  }
 }

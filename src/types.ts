@@ -13,6 +13,7 @@ export interface CertificateFields {
   trades: [TradeRow, TradeRow, TradeRow];
   notes: string;
   signoff: string;
+  showLogo: boolean;
 }
 
 export type ExportFormat = 'image/png' | 'image/jpeg' | 'image/webp';

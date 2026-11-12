@@ -1,10 +1,14 @@
 import './style.css';
-import { drawCertificate, loadBackgroundImage } from './certificateCanvas.ts';
+import { drawCertificate, loadBackgroundImage, loadLogoImage } from './certificateCanvas.ts';
 import { canvasToBlob, downloadBlob, EXTENSIONS } from './exportImage.ts';
 import { saveFileAs } from './saveFile.ts';
 import { copyCanvasToClipboard, isClipboardImageSupported } from './clipboard.ts';
 import { ensureUnlocked } from './passwordGate.ts';
+import { getCookie, setCookie } from './cookies.ts';
 import type { CertificateFields, ExportFormat, TradeAction } from './types.ts';
+
+const CONVENTION_COOKIE = 'trade-cert-convention';
+const SIGNOFF_COOKIE = 'trade-cert-signoff';
 
 async function main(): Promise<void> {
   await ensureUnlocked();
@@ -17,6 +21,7 @@ async function main(): Promise<void> {
   const character = document.querySelector<HTMLInputElement>('#character')!;
   const notes = document.querySelector<HTMLTextAreaElement>('#notes')!;
   const signoff = document.querySelector<HTMLTextAreaElement>('#signoff')!;
+  const showLogo = document.querySelector<HTMLInputElement>('#show-logo')!;
   const exportFormat = document.querySelector<HTMLSelectElement>('#export-format')!;
   const downloadBtn = document.querySelector<HTMLButtonElement>('#download-btn')!;
   const copyBtn = document.querySelector<HTMLButtonElement>('#copy-btn')!;
@@ -41,14 +46,16 @@ async function main(): Promise<void> {
       })) as CertificateFields['trades'],
       notes: notes.value,
       signoff: signoff.value,
+      showLogo: showLogo.checked,
     };
   }
 
   let backgroundImage: HTMLImageElement | undefined;
+  let logoImage: HTMLImageElement | undefined;
 
   function render(): void {
     if (!backgroundImage) return;
-    drawCertificate(ctx, backgroundImage, readFields());
+    drawCertificate(ctx, backgroundImage, logoImage, readFields());
   }
 
   function setStatus(message: string, kind: 'success' | 'error' | '' = ''): void {
@@ -63,12 +70,21 @@ async function main(): Promise<void> {
     character,
     notes,
     signoff,
+    showLogo,
     ...tradeRowInputs.flatMap((row) => [row.action, row.itemGold, row.newItemSpell]),
   ];
   for (const input of allInputs) {
     input.addEventListener('input', render);
     input.addEventListener('change', render);
   }
+
+  const storedConvention = getCookie(CONVENTION_COOKIE);
+  if (storedConvention !== undefined) convention.value = storedConvention;
+  const storedSignoff = getCookie(SIGNOFF_COOKIE);
+  if (storedSignoff !== undefined) signoff.value = storedSignoff;
+
+  convention.addEventListener('input', () => setCookie(CONVENTION_COOKIE, convention.value));
+  signoff.addEventListener('input', () => setCookie(SIGNOFF_COOKIE, signoff.value));
 
   downloadBtn.addEventListener('click', () => {
     void (async () => {
@@ -109,6 +125,7 @@ async function main(): Promise<void> {
   });
 
   backgroundImage = await loadBackgroundImage();
+  logoImage = await loadLogoImage();
   render();
 }
 
