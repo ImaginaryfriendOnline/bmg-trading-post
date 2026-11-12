@@ -47,7 +47,7 @@ let backgroundImage: HTMLImageElement | undefined;
 export async function loadBackgroundImage(): Promise<HTMLImageElement> {
   if (backgroundImage) return backgroundImage;
   const img = new Image();
-  img.src = '/trading-post-cert.png';
+  img.src = `${import.meta.env.BASE_URL}trading-post-cert.png`;
   await img.decode();
   backgroundImage = img;
   return img;
