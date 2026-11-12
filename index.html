@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coinlord's Caravan Trade Certificate</title>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <header class="brand">
+          <h1>Trade Certificate</h1>
+          <p>Fill in the fields to generate a Coinlord's Caravan Trade Certificate.</p>
+        </header>
+
+        <section class="panel">
+          <h2>Details</h2>
+          <label>Convention<input type="text" id="convention" /></label>
+          <label>Player<input type="text" id="player" /></label>
+          <label>Character<input type="text" id="character" /></label>
+        </section>
+
+        <section class="panel">
+          <h2>Trades</h2>
+          <div class="trade-row">
+            <label>Action
+              <select id="trade-0-action">
+                <option value="Trade">Trade</option>
+                <option value="Buy">Buy</option>
+                <option value="Scribe">Scribe</option>
+              </select>
+            </label>
+            <div class="field-grid">
+              <label>Item/Gold<input type="text" id="trade-0-item-gold" /></label>
+              <label>New Item/Spell<input type="text" id="trade-0-new-item" /></label>
+            </div>
+          </div>
+          <div class="trade-row">
+            <label>Action
+              <select id="trade-1-action">
+                <option value="Trade">Trade</option>
+                <option value="Buy">Buy</option>
+                <option value="Scribe">Scribe</option>
+              </select>
+            </label>
+            <div class="field-grid">
+              <label>Item/Gold<input type="text" id="trade-1-item-gold" /></label>
+              <label>New Item/Spell<input type="text" id="trade-1-new-item" /></label>
+            </div>
+          </div>
+          <div class="trade-row">
+            <label>Action
+              <select id="trade-2-action">
+                <option value="Trade">Trade</option>
+                <option value="Buy">Buy</option>
+                <option value="Scribe">Scribe</option>
+              </select>
+            </label>
+            <div class="field-grid">
+              <label>Item/Gold<input type="text" id="trade-2-item-gold" /></label>
+              <label>New Item/Spell<input type="text" id="trade-2-new-item" /></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Notes &amp; Signoff</h2>
+          <label>Notes<textarea id="notes" rows="4"></textarea></label>
+          <label>Marketplace Signoff<textarea id="signoff" rows="2"></textarea></label>
+        </section>
+
+        <section class="panel">
+          <h2>Export</h2>
+          <label>Format
+            <select id="export-format">
+              <option value="image/png" selected>PNG</option>
+              <option value="image/jpeg">JPEG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </label>
+          <div class="row">
+            <button type="button" id="download-btn">Download</button>
+            <button type="button" id="copy-btn" class="secondary">Copy to Clipboard</button>
+          </div>
+          <div id="export-status"></div>
+        </section>
+      </aside>
+
+      <main class="stage">
+        <canvas id="cert-canvas" width="1965" height="871"></canvas>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
