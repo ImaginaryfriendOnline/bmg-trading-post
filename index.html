@@ -7,63 +7,89 @@
     <title>Coinlord's Caravan Trade Certificate</title>
   </head>
   <body>
+    <nav class="tab-bar">
+      <button type="button" class="tab active" id="tab-trade" data-cert="trade">Trade Certificate</button>
+      <button type="button" class="tab" id="tab-death-insurance" data-cert="death-insurance">Death Insurance</button>
+    </nav>
+
     <div class="app">
       <aside class="sidebar">
-        <header class="brand">
-          <h1>Trade Certificate</h1>
-          <p>Fill in the fields to generate a Coinlord's Caravan Trade Certificate.</p>
-        </header>
+        <div class="cert-panels" id="panels-trade">
+          <header class="brand">
+            <h1>Trade Certificate</h1>
+            <p>Fill in the fields to generate a Coinlord's Caravan Trade Certificate.</p>
+          </header>
 
-        <section class="panel">
-          <h2>Details</h2>
-          <label>Convention<input type="text" id="convention" /></label>
-          <label>Player<input type="text" id="player" /></label>
-          <label>Character<input type="text" id="character" /></label>
-        </section>
+          <section class="panel">
+            <h2>Details</h2>
+            <label>Convention<input type="text" id="convention" /></label>
+            <label>Player<input type="text" id="player" /></label>
+            <label>Character<input type="text" id="character" /></label>
+          </section>
 
-        <section class="panel">
-          <h2>Trades</h2>
-          <div class="trade-row">
-            <label>Action
-              <select id="trade-0-action">
-                <option value="Trade">Trade</option>
-                <option value="Buy">Buy</option>
-                <option value="Scribe">Scribe</option>
-              </select>
-            </label>
-            <label>Item/Gold<input type="text" id="trade-0-item-gold" /></label>
-            <label>New Item/Spell<input type="text" id="trade-0-new-item" /></label>
-          </div>
-          <div class="trade-row">
-            <label>Action
-              <select id="trade-1-action">
-                <option value="Trade">Trade</option>
-                <option value="Buy">Buy</option>
-                <option value="Scribe">Scribe</option>
-              </select>
-            </label>
-            <label>Item/Gold<input type="text" id="trade-1-item-gold" /></label>
-            <label>New Item/Spell<input type="text" id="trade-1-new-item" /></label>
-          </div>
-          <div class="trade-row">
-            <label>Action
-              <select id="trade-2-action">
-                <option value="Trade">Trade</option>
-                <option value="Buy">Buy</option>
-                <option value="Scribe">Scribe</option>
-              </select>
-            </label>
-            <label>Item/Gold<input type="text" id="trade-2-item-gold" /></label>
-            <label>New Item/Spell<input type="text" id="trade-2-new-item" /></label>
-          </div>
-        </section>
+          <section class="panel">
+            <h2>Trades</h2>
+            <div class="trade-row">
+              <label>Action
+                <select id="trade-0-action">
+                  <option value="Trade">Trade</option>
+                  <option value="Buy">Buy</option>
+                  <option value="Scribe">Scribe</option>
+                </select>
+              </label>
+              <label>Item/Gold<input type="text" id="trade-0-item-gold" /></label>
+              <label>New Item/Spell<input type="text" id="trade-0-new-item" /></label>
+            </div>
+            <div class="trade-row">
+              <label>Action
+                <select id="trade-1-action">
+                  <option value="Trade">Trade</option>
+                  <option value="Buy">Buy</option>
+                  <option value="Scribe">Scribe</option>
+                </select>
+              </label>
+              <label>Item/Gold<input type="text" id="trade-1-item-gold" /></label>
+              <label>New Item/Spell<input type="text" id="trade-1-new-item" /></label>
+            </div>
+            <div class="trade-row">
+              <label>Action
+                <select id="trade-2-action">
+                  <option value="Trade">Trade</option>
+                  <option value="Buy">Buy</option>
+                  <option value="Scribe">Scribe</option>
+                </select>
+              </label>
+              <label>Item/Gold<input type="text" id="trade-2-item-gold" /></label>
+              <label>New Item/Spell<input type="text" id="trade-2-new-item" /></label>
+            </div>
+          </section>
 
-        <section class="panel">
-          <h2>Notes &amp; Signoff</h2>
-          <label>Notes<textarea id="notes" rows="4"></textarea></label>
-          <label>Marketplace Signoff<textarea id="signoff" rows="2"></textarea></label>
-          <label class="checkbox-row"><input type="checkbox" id="show-logo" checked /> Show BMG logo on signoff</label>
-        </section>
+          <section class="panel">
+            <h2>Notes &amp; Signoff</h2>
+            <label>Notes<textarea id="notes" rows="4"></textarea></label>
+            <label>Marketplace Signoff<textarea id="signoff" rows="2"></textarea></label>
+            <label class="checkbox-row"><input type="checkbox" id="show-logo" checked /> Show BMG logo on signoff</label>
+          </section>
+        </div>
+
+        <div class="cert-panels" id="panels-death-insurance" hidden>
+          <header class="brand">
+            <h1>Death Insurance</h1>
+            <p>Fill in the fields to generate a Death Insurance certificate.</p>
+          </header>
+
+          <section class="panel">
+            <h2>Details</h2>
+            <label>Player<input type="text" id="death-player" /></label>
+            <label>Character<input type="text" id="death-character" /></label>
+            <label>Level<input type="text" id="death-level" /></label>
+          </section>
+
+          <section class="panel">
+            <h2>Signature</h2>
+            <label>High Priest Signature<input type="text" id="death-signature" /></label>
+          </section>
+        </div>
 
         <section class="panel">
           <h2>Export</h2>

@@ -16,4 +16,12 @@ export interface CertificateFields {
   showLogo: boolean;
 }
 
+export interface DeathInsuranceFields {
+  player: string;
+  characterAndLevel: string;
+  signature: string;
+}
+
 export type ExportFormat = 'image/png' | 'image/jpeg' | 'image/webp';
+
+export type CertId = 'trade' | 'death-insurance';

@@ -1,11 +1,18 @@
 import './style.css';
-import { drawCertificate, loadBackgroundImage, loadLogoImage } from './certificateCanvas.ts';
+import { drawCertificate, loadBackgroundImage, CANVAS_WIDTH, CANVAS_HEIGHT } from './certificateCanvas.ts';
+import {
+  drawDeathInsuranceCertificate,
+  loadDeathBackgroundImage,
+  DEATH_CANVAS_WIDTH,
+  DEATH_CANVAS_HEIGHT,
+} from './deathInsuranceCanvas.ts';
+import { loadImage } from './textLayout.ts';
 import { canvasToBlob, downloadBlob, EXTENSIONS } from './exportImage.ts';
 import { saveFileAs } from './saveFile.ts';
 import { copyCanvasToClipboard, isClipboardImageSupported } from './clipboard.ts';
 import { ensureUnlocked } from './passwordGate.ts';
 import { getCookie, setCookie } from './cookies.ts';
-import type { CertificateFields, ExportFormat, TradeAction } from './types.ts';
+import type { CertificateFields, DeathInsuranceFields, ExportFormat, TradeAction, CertId } from './types.ts';
 
 const CONVENTION_COOKIE = 'trade-cert-convention';
 const SIGNOFF_COOKIE = 'trade-cert-signoff';
@@ -15,6 +22,20 @@ async function main(): Promise<void> {
 
   const canvas = document.querySelector<HTMLCanvasElement>('#cert-canvas')!;
   const ctx = canvas.getContext('2d')!;
+  const exportFormat = document.querySelector<HTMLSelectElement>('#export-format')!;
+  const downloadBtn = document.querySelector<HTMLButtonElement>('#download-btn')!;
+  const copyBtn = document.querySelector<HTMLButtonElement>('#copy-btn')!;
+  const exportStatus = document.querySelector<HTMLDivElement>('#export-status')!;
+
+  function setStatus(message: string, kind: 'success' | 'error' | '' = ''): void {
+    exportStatus.textContent = message;
+    if (kind) exportStatus.dataset['kind'] = kind;
+    else delete exportStatus.dataset['kind'];
+  }
+
+  const logoImage = await loadImage(`${import.meta.env.BASE_URL}bmg-logo.png`);
+
+  // ------------------------------------------------------------- trade cert
 
   const convention = document.querySelector<HTMLInputElement>('#convention')!;
   const player = document.querySelector<HTMLInputElement>('#player')!;
@@ -22,10 +43,6 @@ async function main(): Promise<void> {
   const notes = document.querySelector<HTMLTextAreaElement>('#notes')!;
   const signoff = document.querySelector<HTMLTextAreaElement>('#signoff')!;
   const showLogo = document.querySelector<HTMLInputElement>('#show-logo')!;
-  const exportFormat = document.querySelector<HTMLSelectElement>('#export-format')!;
-  const downloadBtn = document.querySelector<HTMLButtonElement>('#download-btn')!;
-  const copyBtn = document.querySelector<HTMLButtonElement>('#copy-btn')!;
-  const exportStatus = document.querySelector<HTMLDivElement>('#export-status')!;
 
   const tradeRowInputs = [0, 1, 2].map((index) => ({
     action: document.querySelector<HTMLSelectElement>(`#trade-${index}-action`)!,
@@ -33,7 +50,7 @@ async function main(): Promise<void> {
     newItemSpell: document.querySelector<HTMLInputElement>(`#trade-${index}-new-item`)!,
   }));
 
-  function readFields(): CertificateFields {
+  function readTradeFields(): CertificateFields {
     const [row0, row1, row2] = tradeRowInputs;
     return {
       convention: convention.value,
@@ -50,21 +67,13 @@ async function main(): Promise<void> {
     };
   }
 
-  let backgroundImage: HTMLImageElement | undefined;
-  let logoImage: HTMLImageElement | undefined;
+  const tradeBackground = await loadBackgroundImage();
 
-  function render(): void {
-    if (!backgroundImage) return;
-    drawCertificate(ctx, backgroundImage, logoImage, readFields());
+  function renderTrade(): void {
+    drawCertificate(ctx, tradeBackground, logoImage, readTradeFields());
   }
 
-  function setStatus(message: string, kind: 'success' | 'error' | '' = ''): void {
-    exportStatus.textContent = message;
-    if (kind) exportStatus.dataset['kind'] = kind;
-    else delete exportStatus.dataset['kind'];
-  }
-
-  const allInputs = [
+  const tradeInputs = [
     convention,
     player,
     character,
@@ -73,9 +82,13 @@ async function main(): Promise<void> {
     showLogo,
     ...tradeRowInputs.flatMap((row) => [row.action, row.itemGold, row.newItemSpell]),
   ];
-  for (const input of allInputs) {
-    input.addEventListener('input', render);
-    input.addEventListener('change', render);
+  for (const input of tradeInputs) {
+    input.addEventListener('input', () => {
+      if (activeCert === 'trade') renderTrade();
+    });
+    input.addEventListener('change', () => {
+      if (activeCert === 'trade') renderTrade();
+    });
   }
 
   const storedConvention = getCookie(CONVENTION_COOKIE);
@@ -86,13 +99,84 @@ async function main(): Promise<void> {
   convention.addEventListener('input', () => setCookie(CONVENTION_COOKIE, convention.value));
   signoff.addEventListener('input', () => setCookie(SIGNOFF_COOKIE, signoff.value));
 
+  // ------------------------------------------------------- death insurance
+
+  const deathPlayer = document.querySelector<HTMLInputElement>('#death-player')!;
+  const deathCharacter = document.querySelector<HTMLInputElement>('#death-character')!;
+  const deathLevel = document.querySelector<HTMLInputElement>('#death-level')!;
+  const deathSignature = document.querySelector<HTMLInputElement>('#death-signature')!;
+
+  function readDeathFields(): DeathInsuranceFields {
+    const character = deathCharacter.value.trim();
+    const level = deathLevel.value.trim();
+    const characterAndLevel = level ? `${character ? `${character} ` : ''}(Level ${level})` : character;
+    return {
+      player: deathPlayer.value,
+      characterAndLevel,
+      signature: deathSignature.value,
+    };
+  }
+
+  const deathBackground = await loadDeathBackgroundImage();
+
+  function renderDeath(): void {
+    drawDeathInsuranceCertificate(ctx, deathBackground, logoImage, readDeathFields());
+  }
+
+  const deathInputs = [deathPlayer, deathCharacter, deathLevel, deathSignature];
+  for (const input of deathInputs) {
+    input.addEventListener('input', () => {
+      if (activeCert === 'death-insurance') renderDeath();
+    });
+    input.addEventListener('change', () => {
+      if (activeCert === 'death-insurance') renderDeath();
+    });
+  }
+
+  // ------------------------------------------------------------------ tabs
+
+  const certs: Record<CertId, { width: number; height: number; render: () => void; filenameBase: string }> = {
+    trade: { width: CANVAS_WIDTH, height: CANVAS_HEIGHT, render: renderTrade, filenameBase: 'coinlords-caravan-certificate' },
+    'death-insurance': {
+      width: DEATH_CANVAS_WIDTH,
+      height: DEATH_CANVAS_HEIGHT,
+      render: renderDeath,
+      filenameBase: 'death-insurance-certificate',
+    },
+  };
+
+  let activeCert: CertId = 'trade';
+
+  const tabButtons = document.querySelectorAll<HTMLButtonElement>('.tab');
+  function activateCert(id: CertId): void {
+    activeCert = id;
+    const cert = certs[id];
+    canvas.width = cert.width;
+    canvas.height = cert.height;
+    cert.render();
+
+    for (const button of tabButtons) {
+      button.classList.toggle('active', button.dataset['cert'] === id);
+    }
+    for (const panel of document.querySelectorAll<HTMLDivElement>('.cert-panels')) {
+      panel.hidden = panel.id !== `panels-${id}`;
+    }
+    setStatus('');
+  }
+
+  for (const button of tabButtons) {
+    button.addEventListener('click', () => activateCert(button.dataset['cert'] as CertId));
+  }
+
+  // --------------------------------------------------------------- export
+
   downloadBtn.addEventListener('click', () => {
     void (async () => {
       try {
         const format = exportFormat.value as ExportFormat;
         const blob = await canvasToBlob(canvas, format, 0.92);
         const extension = EXTENSIONS[format];
-        const filename = `coinlords-caravan-certificate.${extension}`;
+        const filename = `${certs[activeCert].filenameBase}.${extension}`;
         if (window.showSaveFilePicker) {
           await saveFileAs(blob, filename, {
             description: 'Certificate image',
@@ -124,9 +208,7 @@ async function main(): Promise<void> {
     })();
   });
 
-  backgroundImage = await loadBackgroundImage();
-  logoImage = await loadLogoImage();
-  render();
+  activateCert('trade');
 }
 
 void main();
