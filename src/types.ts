@@ -1,4 +1,4 @@
-export type TradeAction = 'Trade' | 'Buy' | 'Scribe';
+export type TradeAction = 'Trade' | 'Buy' | 'Scribe' | 'None';
 
 export interface TradeRow {
   action: TradeAction;

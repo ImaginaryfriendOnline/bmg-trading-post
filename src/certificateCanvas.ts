@@ -31,8 +31,8 @@ export const FIELD_LAYOUT = {
 /** Reserved square in the right part of the signoff box for the optional BMG logo. */
 export const LOGO_LAYOUT = { x: 1793, y: 711, width: 100, height: 100 };
 
-/** Bounding ellipses around each pre-printed word in the Action column, measured against row 1; add ACTION_ROW_Y_STEP per row below. */
-const ACTION_WORD_LAYOUT: Record<TradeAction, { cx: number; cy: number; rx: number; ry: number }> = {
+/** Bounding ellipses around each pre-printed word in the Action column, measured against row 1; add ACTION_ROW_Y_STEP per row below. "None" has no word to circle. */
+const ACTION_WORD_LAYOUT: Partial<Record<TradeAction, { cx: number; cy: number; rx: number; ry: number }>> = {
   Trade: { cx: 259.5, cy: 479, rx: 48, ry: 20 },
   Buy: { cx: 359, cy: 483, rx: 34, ry: 22 },
   Scribe: { cx: 460, cy: 479, rx: 51, ry: 20 },
@@ -41,6 +41,7 @@ const ACTION_ROW_Y_STEP = 58;
 
 function circleSelectedAction(ctx: CanvasRenderingContext2D, action: TradeAction, rowIndex: number): void {
   const word = ACTION_WORD_LAYOUT[action];
+  if (!word) return;
   ctx.save();
   ctx.strokeStyle = '#c0392b';
   ctx.lineWidth = 3;
