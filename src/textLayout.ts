@@ -51,10 +51,22 @@ export function fillTextTruncated(ctx: CanvasRenderingContext2D, text: string, f
   ctx.fillText(display, field.x, field.y);
 }
 
-/** Word-wraps each paragraph to maxWidth, but treats '\n' in the source text as a hard line break. */
-export function wrapText(ctx: CanvasRenderingContext2D, text: string, field: MultiLineField): void {
+/** Font string for a handwriting-style line, scaled up since script fonts read smaller than the normal font at the same pixel size. */
+export function handwrittenFont(fontSize: number): string {
+  return `700 ${Math.round(fontSize * 1.3)}px "Dancing Script", cursive`;
+}
+
+/** Word-wraps each paragraph to maxWidth, but treats '\n' in the source text as a hard line break.
+ * If firstLineFont is given, the first rendered line is drawn with that font instead of the normal one. */
+export function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  field: MultiLineField,
+  firstLineFont?: string,
+): void {
   if (!text) return;
-  ctx.font = `400 ${field.fontSize}px "Segoe UI", system-ui, sans-serif`;
+  const normalFont = `400 ${field.fontSize}px "Segoe UI", system-ui, sans-serif`;
+  ctx.font = normalFont;
   ctx.fillStyle = '#111';
   ctx.textBaseline = 'alphabetic';
 
@@ -89,6 +101,12 @@ export function wrapText(ctx: CanvasRenderingContext2D, text: string, field: Mul
   }
 
   lines.forEach((line, index) => {
-    ctx.fillText(line, field.x, field.y + index * field.lineHeight);
+    if (index === 0 && firstLineFont) {
+      ctx.font = firstLineFont;
+      ctx.fillText(line, field.x, field.y + index * field.lineHeight);
+      ctx.font = normalFont;
+    } else {
+      ctx.fillText(line, field.x, field.y + index * field.lineHeight);
+    }
   });
 }

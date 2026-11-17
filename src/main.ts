@@ -17,9 +17,11 @@ import type { CertificateFields, DeathInsuranceFields, ExportFormat, TradeAction
 const CONVENTION_COOKIE = 'trade-cert-convention';
 const SIGNOFF_COOKIE = 'trade-cert-signoff';
 const DEATH_SIGNATURE_COOKIE = 'death-cert-signature';
+const HANDWRITTEN_STYLE_COOKIE = 'handwritten-signature-style';
 
 async function main(): Promise<void> {
   await ensureUnlocked();
+  await document.fonts.load('700 32px "Dancing Script"');
 
   const canvas = document.querySelector<HTMLCanvasElement>('#cert-canvas')!;
   const ctx = canvas.getContext('2d')!;
@@ -46,6 +48,15 @@ async function main(): Promise<void> {
   }
 
   logoChoice.addEventListener('change', () => certs[activeCert].render());
+
+  const handwrittenToggle = document.querySelector<HTMLInputElement>('#handwritten-toggle')!;
+  const storedHandwritten = getCookie(HANDWRITTEN_STYLE_COOKIE);
+  if (storedHandwritten !== undefined) handwrittenToggle.checked = storedHandwritten === 'true';
+
+  handwrittenToggle.addEventListener('change', () => {
+    setCookie(HANDWRITTEN_STYLE_COOKIE, String(handwrittenToggle.checked));
+    certs[activeCert].render();
+  });
 
   // ------------------------------------------------------------- trade cert
 
@@ -80,7 +91,7 @@ async function main(): Promise<void> {
   const tradeBackground = await loadBackgroundImage();
 
   function renderTrade(): void {
-    drawCertificate(ctx, tradeBackground, getSelectedLogo(), readTradeFields());
+    drawCertificate(ctx, tradeBackground, getSelectedLogo(), readTradeFields(), handwrittenToggle.checked);
   }
 
   const tradeInputs = [
@@ -141,7 +152,7 @@ async function main(): Promise<void> {
   const deathBackground = await loadDeathBackgroundImage();
 
   function renderDeath(): void {
-    drawDeathInsuranceCertificate(ctx, deathBackground, getSelectedLogo(), readDeathFields());
+    drawDeathInsuranceCertificate(ctx, deathBackground, getSelectedLogo(), readDeathFields(), handwrittenToggle.checked);
   }
 
   const deathInputs = [deathPlayer, deathCharacter, deathLevel, deathSignature];

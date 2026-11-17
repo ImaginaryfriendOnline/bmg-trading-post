@@ -6,6 +6,7 @@ import {
   wrapText,
   loadImage,
   drawImageContained,
+  handwrittenFont,
 } from './textLayout.ts';
 
 export const CANVAS_WIDTH = 1965;
@@ -71,6 +72,7 @@ export function drawCertificate(
   bg: HTMLImageElement,
   logo: HTMLImageElement | undefined,
   fields: CertificateFields,
+  handwrittenFirstLine = false,
 ): void {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   ctx.drawImage(bg, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -88,7 +90,12 @@ export function drawCertificate(
   });
 
   wrapText(ctx, fields.notes, FIELD_LAYOUT.notes);
-  wrapText(ctx, fields.signoff, FIELD_LAYOUT.signoff);
+  wrapText(
+    ctx,
+    fields.signoff,
+    FIELD_LAYOUT.signoff,
+    handwrittenFirstLine ? handwrittenFont(FIELD_LAYOUT.signoff.fontSize) : undefined,
+  );
 
   if (logo) {
     drawImageContained(ctx, logo, LOGO_LAYOUT);

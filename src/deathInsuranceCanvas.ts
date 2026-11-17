@@ -6,6 +6,7 @@ import {
   wrapText,
   loadImage,
   drawImageContained,
+  handwrittenFont,
 } from './textLayout.ts';
 
 export const DEATH_CANVAS_WIDTH = 1117;
@@ -35,13 +36,19 @@ export function drawDeathInsuranceCertificate(
   bg: HTMLImageElement,
   logo: HTMLImageElement | undefined,
   fields: DeathInsuranceFields,
+  handwrittenFirstLine = false,
 ): void {
   ctx.clearRect(0, 0, DEATH_CANVAS_WIDTH, DEATH_CANVAS_HEIGHT);
   ctx.drawImage(bg, 0, 0, DEATH_CANVAS_WIDTH, DEATH_CANVAS_HEIGHT);
 
   fillTextTruncated(ctx, fields.player, FIELD_LAYOUT.player);
   fillTextTruncated(ctx, fields.characterAndLevel, FIELD_LAYOUT.characterAndLevel);
-  wrapText(ctx, fields.signature, FIELD_LAYOUT.signature);
+  wrapText(
+    ctx,
+    fields.signature,
+    FIELD_LAYOUT.signature,
+    handwrittenFirstLine ? handwrittenFont(FIELD_LAYOUT.signature.fontSize) : undefined,
+  );
 
   if (logo) {
     drawImageContained(ctx, logo, LOGO_LAYOUT);
