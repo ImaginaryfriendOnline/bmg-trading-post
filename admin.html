@@ -13,11 +13,13 @@
       <div class="row">
         <button type="button" id="refresh-btn" class="secondary">Refresh</button>
         <button type="button" id="clear-all-btn" class="secondary">Delete All</button>
+        <label>Player filter<input type="text" id="player-filter" placeholder="Filter by player name" /></label>
       </div>
 
       <table id="requests-table">
         <thead>
           <tr>
+            <th></th>
             <th>Player</th>
             <th>Character</th>
             <th>Created</th>
@@ -28,6 +30,12 @@
         </thead>
         <tbody id="requests-tbody"></tbody>
       </table>
+
+      <div class="row">
+        <button type="button" id="prev-page-btn" class="secondary">Prev</button>
+        <span id="page-indicator"></span>
+        <button type="button" id="next-page-btn" class="secondary">Next</button>
+      </div>
 
       <section class="panel">
         <h2>Default Convention</h2>

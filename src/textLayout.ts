@@ -51,6 +51,20 @@ export function fillTextTruncated(ctx: CanvasRenderingContext2D, text: string, f
   ctx.fillText(display, field.x, field.y);
 }
 
+/** Draws text centered horizontally on the given center x. */
+export function fillTextCentered(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  field: { x: number; y: number; fontSize: number },
+): void {
+  ctx.font = `600 ${field.fontSize}px "Segoe UI", system-ui, sans-serif`;
+  ctx.fillStyle = '#111';
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, field.x, field.y);
+  ctx.textAlign = 'left';
+}
+
 /** Font string for a handwriting-style line, scaled up since script fonts read smaller than the normal font at the same pixel size. */
 export function handwrittenFont(fontSize: number): string {
   return `700 ${Math.round(fontSize * 1.3)}px "Dancing Script", cursive`;

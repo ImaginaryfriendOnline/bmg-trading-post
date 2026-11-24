@@ -351,3 +351,20 @@ button:not(:disabled):hover {
   padding: 4px 8px;
   flex: none;
 }
+
+#requests-table .expand-row {
+  width: 28px;
+}
+
+#requests-table .details-row td {
+  background: var(--panel-alt, rgba(0, 0, 0, 0.03));
+}
+
+#requests-table .details-row ul {
+  margin: 0 0 6px;
+  padding-left: 18px;
+}
+
+#requests-table .details-row p {
+  margin: 0;
+}

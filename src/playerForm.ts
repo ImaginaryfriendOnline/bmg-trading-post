@@ -1,6 +1,7 @@
 import './style.css';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from './firebase.ts';
+import { getDefaultConvention } from './appSettings.ts';
 import { copyTextToClipboard } from './clipboard.ts';
 import type { PlayerRequestDoc, PlayerRequestFields, TradeAction } from './types.ts';
 
@@ -64,7 +65,13 @@ function main(): void {
 
       setStatus('Submitting…');
       try {
-        const docData: PlayerRequestDoc = { ...fields, createdAt: Date.now(), status: 'pending' };
+        const defaultConvention = await getDefaultConvention();
+        const docData: PlayerRequestDoc = {
+          ...fields,
+          createdAt: Date.now(),
+          status: 'pending',
+          ...(defaultConvention !== undefined ? { convention: defaultConvention } : {}),
+        };
         const ref = await addDoc(collection(db, 'requests'), docData);
         const link = `${location.origin}${import.meta.env.BASE_URL}index.html#req=${ref.id}`;
 
@@ -76,6 +83,19 @@ function main(): void {
         setStatus('Could not submit the request (offline?). Try again.', 'error');
       }
     })();
+  });
+
+  document.querySelector<HTMLButtonElement>('#clear-btn')!.addEventListener('click', () => {
+    player.value = '';
+    character.value = '';
+    notes.value = '';
+    for (const row of tradeRowInputs) {
+      row.action.value = 'None';
+      row.itemGold.value = '';
+      row.newItemSpell.value = '';
+    }
+    resultPanel.hidden = true;
+    setStatus('');
   });
 
   document.querySelector<HTMLButtonElement>('#copy-summary-btn')!.addEventListener('click', () => {

@@ -37,6 +37,7 @@ export interface PlayerRequestFields {
 export interface PlayerRequestDoc extends PlayerRequestFields {
   createdAt: number;
   status: 'pending' | 'claimed';
+  convention?: string;
 }
 
 export type PasswordSlot = 'cert-gen' | 'admin';

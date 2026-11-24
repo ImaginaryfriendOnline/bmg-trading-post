@@ -3,6 +3,7 @@ import {
   type SingleLineField,
   type MultiLineField,
   fillTextTruncated,
+  fillTextCentered,
   wrapText,
   loadImage,
   drawImageContained,
@@ -85,8 +86,21 @@ export function drawCertificate(
     const layout = FIELD_LAYOUT.trades[index];
     if (!layout) return;
     circleSelectedAction(ctx, row.action, index);
-    fillTextTruncated(ctx, row.itemGold, layout.itemGold);
-    fillTextTruncated(ctx, row.newItemSpell, layout.newItemSpell);
+    if (row.action === 'None') {
+      fillTextCentered(ctx, '--VOID--', {
+        x: layout.itemGold.x + layout.itemGold.maxWidth / 2,
+        y: layout.itemGold.y,
+        fontSize: layout.itemGold.fontSize,
+      });
+      fillTextCentered(ctx, '--VOID--', {
+        x: layout.newItemSpell.x + layout.newItemSpell.maxWidth / 2,
+        y: layout.newItemSpell.y,
+        fontSize: layout.newItemSpell.fontSize,
+      });
+    } else {
+      fillTextTruncated(ctx, row.itemGold, layout.itemGold);
+      fillTextTruncated(ctx, row.newItemSpell, layout.newItemSpell);
+    }
   });
 
   wrapText(ctx, fields.notes, FIELD_LAYOUT.notes);

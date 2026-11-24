@@ -12,11 +12,20 @@ function escapeHtml(value: string): string {
   return div.innerHTML;
 }
 
+const PAGE_SIZE = 15;
+
 async function main(): Promise<void> {
   await ensureUnlocked('admin');
 
   const tbody = document.querySelector<HTMLTableSectionElement>('#requests-tbody')!;
   const passwordStatus = document.querySelector<HTMLDivElement>('#password-status')!;
+  const playerFilter = document.querySelector<HTMLInputElement>('#player-filter')!;
+  const pageIndicator = document.querySelector<HTMLSpanElement>('#page-indicator')!;
+  const prevPageBtn = document.querySelector<HTMLButtonElement>('#prev-page-btn')!;
+  const nextPageBtn = document.querySelector<HTMLButtonElement>('#next-page-btn')!;
+
+  let allRequests: Array<{ id: string; data: PlayerRequestDoc }> = [];
+  let currentPage = 0;
 
   function setPasswordStatus(message: string, kind: 'success' | 'error' | '' = ''): void {
     passwordStatus.textContent = message;
@@ -24,22 +33,65 @@ async function main(): Promise<void> {
     else delete passwordStatus.dataset['kind'];
   }
 
-  async function loadRequests(): Promise<void> {
-    const snap = await getDocs(query(collection(db, 'requests'), orderBy('createdAt', 'desc')));
+  function buildDetailsHtml(data: PlayerRequestDoc): string {
+    const activeTrades = data.trades.filter((trade) => trade.action !== 'None');
+    const tradesHtml =
+      activeTrades.length === 0
+        ? '<li>(no transactions specified)</li>'
+        : activeTrades
+            .map(
+              (trade) =>
+                `<li>${escapeHtml(trade.action)}: ${escapeHtml(trade.itemGold)} -&gt; ${escapeHtml(trade.newItemSpell)}</li>`,
+            )
+            .join('');
+    const notesHtml = data.notes.trim() ? `<p><strong>Notes:</strong> ${escapeHtml(data.notes)}</p>` : '';
+    const conventionHtml = data.convention ? `<p><strong>Convention:</strong> ${escapeHtml(data.convention)}</p>` : '';
+    return `${conventionHtml}<ul>${tradesHtml}</ul>${notesHtml}`;
+  }
+
+  function filteredRequests(): Array<{ id: string; data: PlayerRequestDoc }> {
+    const needle = playerFilter.value.trim().toLowerCase();
+    if (!needle) return allRequests;
+    return allRequests.filter((request) => request.data.player.toLowerCase().includes(needle));
+  }
+
+  function renderPage(): void {
+    const filtered = filteredRequests();
+    const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    currentPage = Math.min(currentPage, pageCount - 1);
+    const pageRequests = filtered.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
+
     tbody.innerHTML = '';
-    for (const requestDoc of snap.docs) {
-      const data = requestDoc.data() as PlayerRequestDoc;
+    for (const { id, data } of pageRequests) {
       const row = document.createElement('tr');
       row.innerHTML = `
+        <td><button type="button" class="secondary expand-row" data-id="${id}" aria-expanded="false">+</button></td>
         <td>${escapeHtml(data.player)}</td>
         <td>${escapeHtml(data.character)}</td>
         <td>${new Date(data.createdAt).toLocaleString()}</td>
         <td>${escapeHtml(data.status)}</td>
-        <td><a href="index.html#req=${requestDoc.id}" target="_blank" rel="noopener">Open</a></td>
-        <td><button type="button" class="secondary delete-row" data-id="${requestDoc.id}">Delete</button></td>
+        <td><a href="index.html#req=${id}" target="_blank" rel="noopener">Open</a></td>
+        <td><button type="button" class="secondary delete-row" data-id="${id}">Delete</button></td>
       `;
-      tbody.append(row);
+      const detailsRow = document.createElement('tr');
+      detailsRow.className = 'details-row';
+      detailsRow.hidden = true;
+      const detailsCell = document.createElement('td');
+      detailsCell.colSpan = 7;
+      detailsCell.innerHTML = buildDetailsHtml(data);
+      detailsRow.append(detailsCell);
+      tbody.append(row, detailsRow);
     }
+
+    tbody.querySelectorAll<HTMLButtonElement>('.expand-row').forEach((button) => {
+      button.addEventListener('click', () => {
+        const detailsRow = button.closest('tr')!.nextElementSibling as HTMLTableRowElement;
+        const expanded = button.getAttribute('aria-expanded') === 'true';
+        detailsRow.hidden = expanded;
+        button.setAttribute('aria-expanded', String(!expanded));
+        button.textContent = expanded ? '+' : '−';
+      });
+    });
 
     tbody.querySelectorAll<HTMLButtonElement>('.delete-row').forEach((button) => {
       button.addEventListener('click', () => {
@@ -49,7 +101,32 @@ async function main(): Promise<void> {
         })();
       });
     });
+
+    pageIndicator.textContent = `Page ${currentPage + 1} of ${pageCount} (${filtered.length} request${filtered.length === 1 ? '' : 's'})`;
+    prevPageBtn.disabled = currentPage === 0;
+    nextPageBtn.disabled = currentPage >= pageCount - 1;
   }
+
+  async function loadRequests(): Promise<void> {
+    const snap = await getDocs(query(collection(db, 'requests'), orderBy('createdAt', 'desc')));
+    allRequests = snap.docs.map((requestDoc) => ({ id: requestDoc.id, data: requestDoc.data() as PlayerRequestDoc }));
+    renderPage();
+  }
+
+  playerFilter.addEventListener('input', () => {
+    currentPage = 0;
+    renderPage();
+  });
+
+  prevPageBtn.addEventListener('click', () => {
+    currentPage = Math.max(0, currentPage - 1);
+    renderPage();
+  });
+
+  nextPageBtn.addEventListener('click', () => {
+    currentPage += 1;
+    renderPage();
+  });
 
   document.querySelector<HTMLButtonElement>('#refresh-btn')!.addEventListener('click', () => {
     void loadRequests();

@@ -302,6 +302,11 @@ async function main(): Promise<void> {
         row.newItemSpell.value = data.trades[index]!.newItemSpell;
       }
       notes.value = data.notes;
+      if (data.convention !== undefined) {
+        convention.value = data.convention;
+        setCookie(CONVENTION_COOKIE, data.convention);
+        setCookie(CONVENTION_SET_AT_COOKIE, String(Date.now()));
+      }
       activateCert('trade');
       renderTrade();
       await updateDoc(doc(db, 'requests', requestId), { status: 'claimed' }).catch(() => {});
