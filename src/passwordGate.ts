@@ -1,21 +1,28 @@
-const PASSWORD_HASH = '122880f3170baa6b81eedf3819edb9008f05da29a8c122c2229b207b88bc10fb';
-const STORAGE_KEY = 'trade-cert-auth';
+import { getPasswordHash } from './passwordConfig.ts';
+import type { PasswordSlot } from './types.ts';
 
-async function sha256Hex(text: string): Promise<string> {
+const GATE_TITLE: Record<PasswordSlot, string> = {
+  'cert-gen': 'Trade Certificate',
+  admin: 'Trade Request Admin',
+};
+
+export async function sha256Hex(text: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-/** Blocks the page behind a password overlay (casual deterrent only — the hash is public in the bundle). */
-export function ensureUnlocked(): Promise<void> {
-  if (localStorage.getItem(STORAGE_KEY) === PASSWORD_HASH) return Promise.resolve();
+/** Blocks the page behind a password overlay (casual deterrent only — the hash is public in the bundle/Firestore). */
+export async function ensureUnlocked(slot: PasswordSlot): Promise<void> {
+  const storageKey = `trade-cert-auth-${slot}`;
+  const expectedHash = await getPasswordHash(slot);
+  if (localStorage.getItem(storageKey) === expectedHash) return;
 
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.className = 'password-gate';
     overlay.innerHTML = `
       <form class="password-gate-card">
-        <h1>Trade Certificate</h1>
+        <h1>${GATE_TITLE[slot]}</h1>
         <p>Enter the shared password to continue.</p>
         <label>Password<input type="password" id="gate-password" autocomplete="current-password" /></label>
         <div class="row">
@@ -35,8 +42,8 @@ export function ensureUnlocked(): Promise<void> {
       event.preventDefault();
       void (async () => {
         const hash = await sha256Hex(input.value);
-        if (hash === PASSWORD_HASH) {
-          localStorage.setItem(STORAGE_KEY, hash);
+        if (hash === expectedHash) {
+          localStorage.setItem(storageKey, hash);
           overlay.remove();
           resolve();
         } else {

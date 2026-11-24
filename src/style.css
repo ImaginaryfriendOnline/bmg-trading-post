@@ -292,3 +292,62 @@ button:not(:disabled):hover {
   color: var(--danger);
   margin-top: 6px;
 }
+
+/* ----------------------------------------------------------- plain pages */
+
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.page.wide {
+  max-width: 760px;
+}
+
+.page h1 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.page > p {
+  color: var(--muted);
+  margin: 0 0 4px;
+  font-size: 12px;
+}
+
+.status {
+  min-height: 1.4em;
+  font-size: 12px;
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.status[data-kind='success'] {
+  color: var(--success);
+}
+
+.status[data-kind='error'] {
+  color: var(--danger);
+}
+
+#requests-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+#requests-table th,
+#requests-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+#requests-table td button {
+  padding: 4px 8px;
+  flex: none;
+}

@@ -9,3 +9,7 @@ export async function copyCanvasToClipboard(canvas: HTMLCanvasElement): Promise<
   const blob = await canvasToBlob(canvas, 'image/png', 1);
   await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
 }
+
+export async function copyTextToClipboard(text: string): Promise<void> {
+  await navigator.clipboard.writeText(text);
+}

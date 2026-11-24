@@ -12,15 +12,28 @@ import { saveFileAs } from './saveFile.ts';
 import { copyCanvasToClipboard, isClipboardImageSupported } from './clipboard.ts';
 import { ensureUnlocked } from './passwordGate.ts';
 import { getCookie, setCookie } from './cookies.ts';
-import type { CertificateFields, DeathInsuranceFields, ExportFormat, TradeAction, CertId, LogoChoice } from './types.ts';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from './firebase.ts';
+import { getDefaultConvention } from './appSettings.ts';
+import type {
+  CertificateFields,
+  DeathInsuranceFields,
+  ExportFormat,
+  TradeAction,
+  CertId,
+  LogoChoice,
+  PlayerRequestDoc,
+} from './types.ts';
 
 const CONVENTION_COOKIE = 'trade-cert-convention';
+const CONVENTION_SET_AT_COOKIE = 'trade-cert-convention-set-at';
+const CONVENTION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const SIGNOFF_COOKIE = 'trade-cert-signoff';
 const DEATH_SIGNATURE_COOKIE = 'death-cert-signature';
 const HANDWRITTEN_STYLE_COOKIE = 'handwritten-signature-style';
 
 async function main(): Promise<void> {
-  await ensureUnlocked();
+  await ensureUnlocked('cert-gen');
   await document.fonts.load('700 32px "Dancing Script"');
 
   const canvas = document.querySelector<HTMLCanvasElement>('#cert-canvas')!;
@@ -112,11 +125,25 @@ async function main(): Promise<void> {
   }
 
   const storedConvention = getCookie(CONVENTION_COOKIE);
-  if (storedConvention !== undefined) convention.value = storedConvention;
+  const storedConventionSetAt = getCookie(CONVENTION_SET_AT_COOKIE);
+  const conventionAge = storedConventionSetAt ? Date.now() - Number(storedConventionSetAt) : Infinity;
+  if (storedConvention !== undefined && conventionAge <= CONVENTION_MAX_AGE_MS) {
+    convention.value = storedConvention;
+  } else {
+    const defaultConvention = await getDefaultConvention();
+    convention.value = defaultConvention ?? storedConvention ?? '';
+    if (defaultConvention !== undefined) {
+      setCookie(CONVENTION_COOKIE, defaultConvention);
+      setCookie(CONVENTION_SET_AT_COOKIE, String(Date.now()));
+    }
+  }
   const storedSignoff = getCookie(SIGNOFF_COOKIE);
   if (storedSignoff !== undefined) signoff.value = storedSignoff;
 
-  convention.addEventListener('input', () => setCookie(CONVENTION_COOKIE, convention.value));
+  convention.addEventListener('input', () => {
+    setCookie(CONVENTION_COOKIE, convention.value);
+    setCookie(CONVENTION_SET_AT_COOKIE, String(Date.now()));
+  });
   signoff.addEventListener('input', () => setCookie(SIGNOFF_COOKIE, signoff.value));
 
   document.querySelector<HTMLButtonElement>('#clear-trade')!.addEventListener('click', () => {
@@ -251,6 +278,39 @@ async function main(): Promise<void> {
       }
     })();
   });
+
+  // ------------------------------------------------------- player requests
+
+  async function tryPrefillFromRequest(): Promise<void> {
+    const match = location.hash.match(/^#req=(.+)$/);
+    if (!match) return;
+    const requestId = match[1]!;
+    history.replaceState(null, '', location.pathname + location.search);
+
+    try {
+      const snap = await getDoc(doc(db, 'requests', requestId));
+      const data = snap.data() as PlayerRequestDoc | undefined;
+      if (!data) {
+        setStatus('That request link was not found.', 'error');
+        return;
+      }
+      player.value = data.player;
+      character.value = data.character;
+      for (const [index, row] of tradeRowInputs.entries()) {
+        row.action.value = data.trades[index]!.action;
+        row.itemGold.value = data.trades[index]!.itemGold;
+        row.newItemSpell.value = data.trades[index]!.newItemSpell;
+      }
+      notes.value = data.notes;
+      activateCert('trade');
+      renderTrade();
+      await updateDoc(doc(db, 'requests', requestId), { status: 'claimed' }).catch(() => {});
+    } catch {
+      setStatus('Could not load that request (offline?).', 'error');
+    }
+  }
+
+  await tryPrefillFromRequest();
 
   activateCert('trade');
 }

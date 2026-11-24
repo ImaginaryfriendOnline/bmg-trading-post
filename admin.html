@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Trade Request Admin</title>
+  </head>
+  <body>
+    <div class="page wide">
+      <h1>Trade Requests</h1>
+
+      <div class="row">
+        <button type="button" id="refresh-btn" class="secondary">Refresh</button>
+        <button type="button" id="clear-all-btn" class="secondary">Delete All</button>
+      </div>
+
+      <table id="requests-table">
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Character</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Link</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="requests-tbody"></tbody>
+      </table>
+
+      <section class="panel">
+        <h2>Default Convention</h2>
+        <p>Overrules a cert-generator Convention field older than 24 hours. Fresh (&lt;24h) values typed on the generator are left alone.</p>
+        <label>Convention<input type="text" id="default-convention" /></label>
+        <div class="row">
+          <button type="button" id="save-default-convention" class="secondary">Update</button>
+        </div>
+        <div id="convention-status" class="status"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Password Settings</h2>
+        <label>Cert-generator password<input type="password" id="new-cert-gen-password" autocomplete="new-password" /></label>
+        <div class="row">
+          <button type="button" id="save-cert-gen-password" class="secondary">Update</button>
+        </div>
+        <label>Admin password<input type="password" id="new-admin-password" autocomplete="new-password" /></label>
+        <div class="row">
+          <button type="button" id="save-admin-password" class="secondary">Update</button>
+        </div>
+        <div id="password-status" class="status"></div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/admin.ts"></script>
+  </body>
+</html>

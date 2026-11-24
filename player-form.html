@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Submit a Trade Request</title>
+  </head>
+  <body>
+    <div class="page">
+      <h1>Submit a Trade Request</h1>
+      <p>Fill this in, then send the generated summary + link to your Zilchus rep.</p>
+
+      <section class="panel">
+        <h2>Details</h2>
+        <label>Player<input type="text" id="player" /></label>
+        <label>Character<input type="text" id="character" /></label>
+      </section>
+
+      <section class="panel">
+        <h2>Trades</h2>
+        <div class="trade-row">
+          <label>Action
+            <select id="trade-0-action">
+              <option value="Trade">Trade</option>
+              <option value="Buy">Buy</option>
+              <option value="Scribe">Scribe</option>
+              <option value="None" selected>None</option>
+            </select>
+          </label>
+          <label>Item/Gold<input type="text" id="trade-0-item-gold" /></label>
+          <label>New Item/Spell<input type="text" id="trade-0-new-item" /></label>
+        </div>
+        <div class="trade-row">
+          <label>Action
+            <select id="trade-1-action">
+              <option value="Trade">Trade</option>
+              <option value="Buy">Buy</option>
+              <option value="Scribe">Scribe</option>
+              <option value="None" selected>None</option>
+            </select>
+          </label>
+          <label>Item/Gold<input type="text" id="trade-1-item-gold" /></label>
+          <label>New Item/Spell<input type="text" id="trade-1-new-item" /></label>
+        </div>
+        <div class="trade-row">
+          <label>Action
+            <select id="trade-2-action">
+              <option value="Trade">Trade</option>
+              <option value="Buy">Buy</option>
+              <option value="Scribe">Scribe</option>
+              <option value="None" selected>None</option>
+            </select>
+          </label>
+          <label>Item/Gold<input type="text" id="trade-2-item-gold" /></label>
+          <label>New Item/Spell<input type="text" id="trade-2-new-item" /></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Notes</h2>
+        <label>Notes<textarea id="notes" rows="4"></textarea></label>
+      </section>
+
+      <div class="row">
+        <button type="button" id="generate-btn">Generate Request</button>
+      </div>
+      <div id="form-status" class="status"></div>
+
+      <section class="panel" id="result-panel" hidden>
+        <h2>Share with your Zilchus rep</h2>
+        <label>Summary<textarea id="summary-text" rows="8" readonly></textarea></label>
+        <div class="row">
+          <button type="button" id="copy-summary-btn" class="secondary">Copy Summary</button>
+        </div>
+        <label>Link<input type="text" id="request-link" readonly /></label>
+        <div class="row">
+          <button type="button" id="copy-link-btn" class="secondary">Copy Link</button>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/playerForm.ts"></script>
+  </body>
+</html>
